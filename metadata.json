@@ -1,0 +1,12 @@
+{
+  "name": "Pass Search Provider",
+  "description": "Search for images en Pass easily.",
+  "uuid": "pass-search-provider@atareao.es",
+  "url": "https://github.com/atareao/pass-search-provider",
+  "donations": {
+    "github": "atareao"
+  },
+  "shell-version": ["45", "46", "47"],
+  "settings-schema": "org.gnome.shell.extensions.pass-search-provider"
+}
+
