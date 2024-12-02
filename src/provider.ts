@@ -93,26 +93,21 @@ export default class PassSearchProvider<
 
             for(const identifier of results){
                 // TODO: check for messages that don't exist, show generic error message
-                let meta = this._results.get(identifier);
+                let meta = this._passtoreFileTree.get(identifier);
                 if (meta){
                     //console.log("[PSP]", "Id: " + meta.id);
                     //console.log("[PSP]", "Url: " + meta.previewURL);
-                    //console.log("[PSP]", "widht: " + meta.previewWidth);
-                    //console.log("[PSP]", "height: " + meta.previewHeight);
                     resultMetas.push({
                         id: `${meta.id}`,
-                        name: meta.tags,
-                        description : meta.tags,
+                        name: meta.shortName,
+                        description : meta.directory,
                         createIcon: (size) => {
-                            //console.log("[PSP]", "height: " + meta.previewHeight);
                             console.log(size);
                             const actor = new Clutter.Actor(); 
                             const gicon = Gio.icon_new_for_string(meta.previewURL);
                             const icon = new St.Icon({
                                 gicon: gicon,
-                                width: meta.previewWidth,
-                                height: meta.previewHeight,
-                                style_class: 'youtube-icon'
+                                icon_size: size,
                             });
                             actor.add_child(icon);
                             return actor;
