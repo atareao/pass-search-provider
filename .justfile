@@ -1,5 +1,4 @@
-NAME   := "pixabay-search-provider"
-DOMAIN := "atareao.es"
+EXTENSION := `cat metadata.json | jq -r '.uuid'`
 
 default:
     @just --list
@@ -23,16 +22,16 @@ make:
 
 install:
     @just make
-    @rm -rf ~/.local/share/gnome-shell/extensions/{{NAME}}@{{DOMAIN}}
-    @mkdir -p ~/.local/share/gnome-shell/extensions/{{NAME}}@{{DOMAIN}}
-    @cp -r dist/* ~/.local/share/gnome-shell/extensions/{{NAME}}@{{DOMAIN}}/
+    @rm -rf ~/.local/share/gnome-shell/extensions/{{ EXTENSION }}
+    @m@rm -rf ~/.local/share/gnome-shell/extensions/{{ EXTENSION }}
+    @cp -r@rm -rf ~/.local/share/gnome-shell/extensions/{{ EXTENSION }}
 
 clean:
     @rm -rf dist
     @mkdir dist
 
 zip:
-    @rm -f ../../{{NAME}}.zip
+    @rm -f ../../{{ EXTENSION }}.zip
     @just make
-    @(cd dist && zip -9r ../../{{NAME}}.zip .)
+    @(cd dist && zip -9r ../../{{ EXTENSION }}.zip .)
 

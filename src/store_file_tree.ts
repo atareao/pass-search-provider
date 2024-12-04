@@ -27,40 +27,54 @@ export default class PassStoreFileTree {
         this._files = {};
     }
     async init(cancellable: Gio.Cancellable){
+        console.log("[PSP]", "PassStoreFileTree init");
         let storePath = GLib.build_filenamev([GLib.get_home_dir(), ".password-store"]);
+        console.log("[PSP]", `storePath: ${storePath}`);
         let storeRootDir = Gio.File.new_for_path(storePath);
-        if(!storeRootDir != null && storeRootDir.query_exists()){
-            for (const result of await this.enumerateGpgFiles(storeRootDir, [], cancellable)) {
-                if(result != null && result.file != null){
-                    let path = storeRootDir.get_relative_path(result.file)?.slice(0, -4); // remove .gpg part
-                    const parent = result.file.get_parent();
-                    if(path != undefined && parent != null){
-                        let directory = storeRootDir.get_relative_path(parent);
-                        let shortName = result.name.slice(0, -4);
-                        this._entries.push(path)
-                        this._files[path] = {
-                            shortName: shortName,
-                            directory: directory,
-                            file: result.file
-                        };
+        try{
+            if(storeRootDir != null && storeRootDir.query_exists(null)){
+                const results: Result[] = [];
+                await this.enumerateGpgFiles(storeRootDir, results, cancellable);
+                for (const result of results){
+                    if(result != null && result.file != null){
+                        let path = storeRootDir.get_relative_path(result.file)?.slice(0, -4); // remove .gpg part
+                        const parent = result.file.get_parent();
+                        if(path != undefined && parent != null){
+                            let directory = storeRootDir.get_relative_path(parent);
+                            let shortName = result.name.slice(0, -4);
+                            console.log("[PSP]", `shortName: ${shortName}`);
+                            this._entries.push(path)
+                            this._files[path] = {
+                                shortName: shortName,
+                                directory: directory,
+                                file: result.file
+                            };
+                        }
                     }
                 }
             }
+        }catch(e){
+            console.error("[PSP]", `Error: ${e}`);
         }
-
     }
 
-    find(terms: string[]) {
-        return this._entries.filter(f => terms.every(term => f.includes(term)));
+    find(terms: string[]): string[] {
+        console.log("[PSP]", `find([${terms}])`);
+        console.log("[PSP]", `entries: ${this._entries}`)
+        const found = this._entries.filter(f => terms.every(term => f.includes(term)));
+        console.log("[PSP]", `found ${found}`);
+        return found;
     }
 
     get(entry: string) {
-        return this._files[entry];
+        console.log("[PSP]", `find([${entry}])`);
+        const file = this._files[entry];
+        console.log("[PSP]", `file ${file}`);
+        return file;
     }
 
-    async enumerateGpgFiles(dir: Gio.File, original: Result[], cancellable: Gio.Cancellable): Promise<Result[]>{
-        const found = [];
-        found.push(...original);
+    async enumerateGpgFiles(dir: Gio.File, results: Result[], cancellable: Gio.Cancellable): Promise<void>{
+        const dirname = dir.get_basename();
         let enumerator = await dir.enumerate_children_async(
             'standard::name,standard::type',
             Gio.FileQueryInfoFlags.NONE,
@@ -74,14 +88,17 @@ export default class PassStoreFileTree {
             let file = enumerator.get_child(info);
             if (file != null){
                 if (type == Gio.FileType.REGULAR && name.endsWith('.gpg')) {
-                    found.push({name: name, file: file});
+                    console.log("[PSP]", `name: ${name}`);
+                    console.log("[PSP]", `dirname: ${dirname}`);
+                    const entry = `${dirname}/${name.replace(".gpg", "")}` 
+                    console.log("[PSP]", `entry: ${entry}`);
+                    results.push({name: entry, file: file});
                 }
                 else if (type == Gio.FileType.DIRECTORY && !info.get_is_hidden()){
-                    await this.enumerateGpgFiles(file, found, cancellable);
+                    await this.enumerateGpgFiles(file, results, cancellable);
                 }
             }
         }
-        return found;
     }
 }
 

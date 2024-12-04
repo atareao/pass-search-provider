@@ -96,7 +96,7 @@ export default class PassSearchProvider<
                     });
                 }
             }
-
+            console.log("[PSP]", `resultMetas: ${resultMetas}`);
             cancellable.disconnect(cancelledId);
             if (!cancellable.is_cancelled())
                 resolve(resultMetas);
@@ -129,7 +129,7 @@ export default class PassSearchProvider<
     }
 
     filterResults(results: string[], maxResults: number) {
-        console.log("[PSP]", `filterResults`);
+        console.log("[PSP]", `filterResults: ${results}`);
         return results.slice(0, maxResults);
     }
 }
